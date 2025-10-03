@@ -98,8 +98,7 @@ export default function DashboardPage() {
                              )}
 
                             {activeTab === "Decision Simulator" && (
-                                <div className="grid grid-cols-1 gap-4">
-                                </div>
+                                <FinancialAdvisorChatbot />
                             )}
 
                             {activeTab === "Progress Tracker" && (
@@ -398,6 +397,148 @@ function FinancialCard({ title, value, change, changeType, icon }: {
             </div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{value}</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">{title}</div>
+        </div>
+    );
+}
+
+function FinancialAdvisorChatbot() {
+    const [currentMessage, setCurrentMessage] = useState("Hi there! I'm your friendly financial advisor. I'm here to help you make smart money decisions. What's your biggest financial concern right now?");
+    const [userInput, setUserInput] = useState("");
+    const [isTyping, setIsTyping] = useState(false);
+    const [conversationHistory, setConversationHistory] = useState<Array<{type: 'advisor' | 'user', message: string}>>([
+        { type: 'advisor', message: "Hi there! I'm your friendly financial advisor. I'm here to help you make smart money decisions. What's your biggest financial concern right now?" }
+    ]);
+
+    const advisorResponses = [
+        "That's a great question! Let me help you think through this step by step.",
+        "I understand your concern. Many people face similar challenges. Here's what I'd recommend...",
+        "Excellent point! Let's break this down into manageable pieces.",
+        "I'm here to help you navigate this. What specific aspect would you like to focus on first?",
+        "That's a common financial situation. Let me share some strategies that have worked for others.",
+        "Great question! Financial decisions can feel overwhelming, but we can tackle this together.",
+        "I appreciate you sharing that with me. Let's explore some options together.",
+        "That's exactly the kind of thoughtful question I love to hear! Here's my perspective..."
+    ];
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!userInput.trim()) return;
+
+        // Add user message to history
+        const newHistory = [...conversationHistory, { type: 'user' as const, message: userInput }];
+        setConversationHistory(newHistory);
+
+        // Simulate advisor typing
+        setIsTyping(true);
+        setUserInput("");
+
+        // Generate advisor response after delay
+        setTimeout(() => {
+            const randomResponse = advisorResponses[Math.floor(Math.random() * advisorResponses.length)];
+            setCurrentMessage(randomResponse);
+            setConversationHistory([...newHistory, { type: 'advisor' as const, message: randomResponse }]);
+            setIsTyping(false);
+        }, 1500);
+    };
+
+    return (
+        <div className="relative min-h-[600px] bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-900 rounded-xl overflow-hidden">
+            {/* Dog Advisor Image - Fixed Position */}
+            <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-10 hidden lg:block" style={{right: 'calc(2rem - 30px)', top: 'calc(50% - 30px)'}}>
+                <div className="relative">
+                    <img 
+                        src="/dog_advisor.png" 
+                        alt="Financial Advisor Dog" 
+                        className="w-72 h-72 object-contain drop-shadow-lg"
+                    />
+                </div>
+            </div>
+
+            {/* Speech Bubble */}
+            <div className="relative z-20 max-w-2xl mx-auto pt-8 px-4">
+                <div className="relative">
+                    {/* Speech Bubble */}
+                    <div className="bg-white dark:bg-slate-700 rounded-2xl p-6 shadow-xl border-2 border-amber-200 dark:border-slate-600 relative">
+                        {/* Speech Bubble Tail */}
+                        <div className="absolute -right-4 top-8 w-0 h-0 border-l-[20px] border-l-amber-200 dark:border-l-slate-600 border-t-[15px] border-t-transparent border-b-[15px] border-b-transparent"></div>
+                        <div className="absolute -right-3 top-8 w-0 h-0 border-l-[18px] border-l-white dark:border-l-slate-700 border-t-[13px] border-t-transparent border-b-[13px] border-b-transparent"></div>
+                        
+                        {/* Message Content */}
+                        <div className="min-h-[120px] flex items-center">
+                            <div className="w-full">
+                                <p className="text-lg text-slate-800 dark:text-slate-200 leading-relaxed">
+                                    {isTyping ? (
+                                        <span className="flex items-center">
+                                            <span className="animate-pulse">Thinking...</span>
+                                            <span className="ml-2 flex space-x-1">
+                                                <span className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></span>
+                                                <span className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></span>
+                                                <span className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
+                                            </span>
+                                        </span>
+                                    ) : (
+                                        <span className="animate-fade-in">{currentMessage}</span>
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* User Input Area */}
+                <div className="mt-8 max-w-2xl mx-auto">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="relative">
+                            <label htmlFor="user-input" className="sr-only">Your response</label>
+                            <textarea
+                                id="user-input"
+                                value={userInput}
+                                onChange={(e) => setUserInput(e.target.value)}
+                                placeholder="Type your response here... (up to 200 words)"
+                                className="w-full min-h-[120px] p-4 text-lg border-2 border-amber-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 resize-none"
+                                maxLength={1000}
+                                disabled={isTyping}
+                            />
+                            <div className="absolute bottom-2 right-2 text-xs text-slate-400">
+                                {userInput.length}/1000 characters
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end">
+                            <button
+                                type="submit"
+                                disabled={!userInput.trim() || isTyping}
+                                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:from-slate-300 disabled:to-slate-400 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 shadow-lg hover:shadow-xl"
+                            >
+                                {isTyping ? 'Sending...' : 'Send Response'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                {/* Conversation History */}
+                {conversationHistory.length > 1 && (
+                    <div className="mt-8 max-w-2xl mx-auto">
+                        <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Conversation History</h3>
+                        <div className="space-y-3 max-h-60 overflow-y-auto">
+                            {conversationHistory.slice(1).map((entry, index) => (
+                                <div key={index} className={`p-3 rounded-lg ${entry.type === 'advisor' ? 'bg-amber-100 dark:bg-slate-600 ml-8' : 'bg-blue-100 dark:bg-slate-700 mr-8'}`}>
+                                    <p className="text-sm text-slate-700 dark:text-slate-200">{entry.message}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Mobile Dog Image */}
+            <div className="lg:hidden absolute bottom-4 right-4 z-10" style={{bottom: 'calc(1rem - 30px)', right: 'calc(1rem - 30px)'}}>
+                <img 
+                    src="/dog_advisor.png" 
+                    alt="Financial Advisor Dog" 
+                    className="w-36 h-36 object-contain drop-shadow-lg opacity-80"
+                />
+            </div>
         </div>
     );
 }
