@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const user = await userService.register(validation.data!);
 
     if (!user) {
-      return createErrorResponse("Email already exists", 409);
+      return createErrorResponse("Sorry, email or password does not match our record", 400);
     }
 
     return NextResponse.json({

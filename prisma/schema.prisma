@@ -18,6 +18,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   sessions  Session[]
+  surveyAnswers SurveyAnswer[]
 }
 
 model Session {
@@ -30,4 +31,17 @@ model Session {
 
   @@index([userId])
   @@index([token])
+}
+
+model SurveyAnswer {
+  id         String   @id @default(uuid())
+  userId     String
+  questionId String
+  answer     String   // JSON string for single or multiple answers
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([userId])
 }

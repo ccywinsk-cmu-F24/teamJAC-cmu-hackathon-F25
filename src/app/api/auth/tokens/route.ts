@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const result = await authService.login(validation.data!);
 
     if (!result) {
-      return createErrorResponse("Invalid email or password", 401);
+      return createErrorResponse("Sorry, email or password does not match our record", 400);
     }
 
     return NextResponse.json({

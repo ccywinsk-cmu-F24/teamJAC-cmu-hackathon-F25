@@ -61,11 +61,11 @@ export function Hero({ onStartAssessment }: HeroProps) {
     setPasswordError(validatePassword(password));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validate both fields on submit
     const emailValidationError = validateEmail(email);
     const passwordValidationError = validatePassword(password);
-    
+
     setEmailTouched(true);
     setPasswordTouched(true);
     setEmailError(emailValidationError);
@@ -73,7 +73,60 @@ export function Hero({ onStartAssessment }: HeroProps) {
 
     // Only proceed if both fields are valid
     if (!emailValidationError && !passwordValidationError) {
-      onStartAssessment();
+      try {
+        // Step 1: Try to login first
+        const loginResponse = await fetch('/api/auth/tokens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        let userId: string;
+        let userEmail: string;
+
+        if (loginResponse.ok) {
+          // User exists and credentials match
+          const loginData = await loginResponse.json();
+          userId = loginData.userId;
+          userEmail = loginData.email;
+        } else {
+          // Step 2: User doesn't exist or password doesn't match, try to register
+          const registerResponse = await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+          });
+
+          if (!registerResponse.ok) {
+            const error = await registerResponse.json();
+            setEmailError(error.error || 'Registration failed');
+            return;
+          }
+
+          const user = await registerResponse.json();
+          userId = user.id;
+          userEmail = user.email;
+        }
+
+        // Store user info in localStorage
+        localStorage.setItem('userId', userId);
+        localStorage.setItem('userEmail', userEmail);
+
+        // Step 3: Check if user has already completed the survey
+        const surveyResponse = await fetch(`/api/users/${userId}/survey`);
+
+        if (surveyResponse.ok) {
+          // User has completed survey, go directly to dashboard
+          window.location.href = '/dashboard';
+          return;
+        }
+
+        // Step 4: User hasn't completed survey, proceed to survey page
+        onStartAssessment();
+      } catch (error) {
+        console.error('Authentication error:', error);
+        setEmailError('An error occurred. Please try again.');
+      }
     }
   };
 
