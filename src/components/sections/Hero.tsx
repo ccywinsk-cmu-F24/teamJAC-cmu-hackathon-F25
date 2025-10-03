@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, TrendingUp, Shield, Users } from 'lucide-react';
 
@@ -6,6 +7,77 @@ interface HeroProps {
 }
 
 export function Hero({ onStartAssessment }: HeroProps) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+
+  const validateEmail = (email: string): string => {
+    if (!email.trim()) {
+      return 'Please enter a valid email address';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return 'Please enter a valid email address';
+    }
+    return '';
+  };
+
+  const validatePassword = (password: string): string => {
+    if (!password.trim()) {
+      return 'Password must be at least 6 characters';
+    }
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return '';
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (emailTouched) {
+      setEmailError(validateEmail(value));
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    if (passwordTouched) {
+      setPasswordError(validatePassword(value));
+    }
+  };
+
+  const handleEmailBlur = () => {
+    setEmailTouched(true);
+    setEmailError(validateEmail(email));
+  };
+
+  const handlePasswordBlur = () => {
+    setPasswordTouched(true);
+    setPasswordError(validatePassword(password));
+  };
+
+  const handleSubmit = () => {
+    // Validate both fields on submit
+    const emailValidationError = validateEmail(email);
+    const passwordValidationError = validatePassword(password);
+    
+    setEmailTouched(true);
+    setPasswordTouched(true);
+    setEmailError(emailValidationError);
+    setPasswordError(passwordValidationError);
+
+    // Only proceed if both fields are valid
+    if (!emailValidationError && !passwordValidationError) {
+      onStartAssessment();
+    }
+  };
+
+  const isFormValid = !validateEmail(email) && !validatePassword(password);
   return (
     <section className="relative min-h-screen flex items-center justify-center px-4 py-12">
       {/* Background */}
@@ -29,20 +101,50 @@ export function Hero({ onStartAssessment }: HeroProps) {
         {/* CTA */}
         <div className="mb-12">
           <div className="max-w-md mx-auto mb-6">
-            <label htmlFor="email" className="sr-only">Email address</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              placeholder="Enter your email"
-              className="w-full text-lg px-4 py-3 rounded-lg border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-            />
+            <div className="mb-4">
+              <label htmlFor="email" className="sr-only">Email address</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                value={email}
+                onChange={handleEmailChange}
+                onBlur={handleEmailBlur}
+                placeholder="Enter your email"
+                className={`w-full text-lg px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
+                  emailError ? 'border-red-500 dark:border-red-400' : 'border-slate-200 dark:border-slate-600'
+                }`}
+              />
+              {emailTouched && emailError && (
+                <p className="text-sm text-red-600 dark:text-red-400 mt-1">{emailError}</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={password}
+                onChange={handlePasswordChange}
+                onBlur={handlePasswordBlur}
+                placeholder="Enter your password"
+                className={`w-full text-lg px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 ${
+                  passwordError ? 'border-red-500 dark:border-red-400' : 'border-slate-200 dark:border-slate-600'
+                }`}
+              />
+              {passwordTouched && passwordError && (
+                <p className="text-sm text-red-600 dark:text-red-400 mt-1">{passwordError}</p>
+              )}
+            </div>
           </div>
           <Button
             size="lg"
-            onClick={onStartAssessment}
-            className="text-lg px-8 py-4 mb-4"
+            onClick={handleSubmit}
+            disabled={!isFormValid}
+            className={`text-lg px-8 py-4 mb-4 ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             Start Your Financial Assessment
             <ArrowRight className="ml-2 h-5 w-5" />

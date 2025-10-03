@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Hero } from '@/components/sections/Hero';
 import { Questionnaire } from '@/components/sections/Questionnaire';
 import { Answer } from '@/components/types/questionnaire';
@@ -8,6 +9,7 @@ import { Answer } from '@/components/types/questionnaire';
 type AppState = 'hero' | 'questionnaire' | 'results';
 
 export default function Home() {
+  const router = useRouter();
   const [appState, setAppState] = useState<AppState>('hero');
   const [userAnswers, setUserAnswers] = useState<Answer[]>([]);
 
@@ -20,9 +22,8 @@ export default function Home() {
     setAppState('results');
   };
 
-  const handleRestart = () => {
-    setAppState('hero');
-    setUserAnswers([]);
+  const handleGoToDashboard = () => {
+    router.push('/dashboard');
   };
 
   return (
@@ -46,10 +47,10 @@ export default function Home() {
                 Thank you for completing your financial assessment. Your personalized recommendations are being prepared.
               </p>
               <button
-                onClick={handleRestart}
+                onClick={handleGoToDashboard}
                 className="bg-gradient-to-r from-indigo-600 to-emerald-500 text-white px-6 py-3 rounded-lg font-medium hover:from-indigo-700 hover:to-emerald-600 transition-all duration-200"
               >
-                Start New Assessment
+                Go to Dashboard
               </button>
             </div>
           </div>
