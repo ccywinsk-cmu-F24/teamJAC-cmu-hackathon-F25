@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 
-const TABS = ["Overview", "Mini-Lessons", "Decision Simulator", "Progress Tracker", "Resource Hub"] as const;
+const TABS = ["Overview", "Mini-Lessons", "Decision Simulator"] as const;
 type Tab = typeof TABS[number];
 
 export default function DashboardPage() {
@@ -101,7 +102,7 @@ export default function DashboardPage() {
                                 <FinancialAdvisorChatbot />
                             )}
 
-                            {activeTab === "Progress Tracker" && (
+                            {/* {activeTab === "Progress Tracker" && (
                                 <div className="grid grid-cols-1 gap-4">
                                     <div className="rounded-xl border border-white/20 bg-white/70 dark:bg-white/10 p-4">
                                        
@@ -113,7 +114,7 @@ export default function DashboardPage() {
                                 <div className="grid grid-cols-1 gap-4">
                                     
                                 </div>
-                            )}
+                            )} */}
                         </section>
                     </div>
                 </main>
@@ -363,7 +364,7 @@ function OverviewDashboard() {
                 <div className="rounded-xl border border-white/20 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">🎯 Next Goal</h3>
                     <p className="text-gray-700 dark:text-gray-300 mb-4">
-                        You're 71% to your emergency fund goal! At your current savings rate, you'll reach $12,000 in 3 months.
+                        You&apos;re 71% to your emergency fund goal! At your current savings rate, you&apos;ll reach $12,000 in 3 months.
                     </p>
                     <div className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
                         Keep up the great work! 🚀
@@ -402,43 +403,65 @@ function FinancialCard({ title, value, change, changeType, icon }: {
 }
 
 function FinancialAdvisorChatbot() {
-    const [currentMessage, setCurrentMessage] = useState("Hi there! I'm your friendly financial advisor. I'm here to help you make smart money decisions. What's your biggest financial concern right now?");
+    const [currentMessage, setCurrentMessage] = useState("Hi there! I'm Buddy, your friendly financial advisor dog! 🐕 I'm here to help you make smart money decisions. What's your biggest financial concern right now?");
     const [userInput, setUserInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const [conversationHistory, setConversationHistory] = useState<Array<{type: 'advisor' | 'user', message: string}>>([
-        { type: 'advisor', message: "Hi there! I'm your friendly financial advisor. I'm here to help you make smart money decisions. What's your biggest financial concern right now?" }
+        { type: 'advisor', message: "Hi there! I'm Buddy, your friendly financial advisor dog! 🐕 I'm here to help you make smart money decisions. What's your biggest financial concern right now?" }
     ]);
+    const [userId, setUserId] = useState<string | null>(null);
 
-    const advisorResponses = [
-        "That's a great question! Let me help you think through this step by step.",
-        "I understand your concern. Many people face similar challenges. Here's what I'd recommend...",
-        "Excellent point! Let's break this down into manageable pieces.",
-        "I'm here to help you navigate this. What specific aspect would you like to focus on first?",
-        "That's a common financial situation. Let me share some strategies that have worked for others.",
-        "Great question! Financial decisions can feel overwhelming, but we can tackle this together.",
-        "I appreciate you sharing that with me. Let's explore some options together.",
-        "That's exactly the kind of thoughtful question I love to hear! Here's my perspective..."
-    ];
+    // Load userId on mount
+    useEffect(() => {
+        const storedUserId = localStorage.getItem('userId');
+        setUserId(storedUserId);
+    }, []);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!userInput.trim()) return;
+        if (!userInput.trim() || !userId) return;
+
+        const userQuestion = userInput.trim();
 
         // Add user message to history
-        const newHistory = [...conversationHistory, { type: 'user' as const, message: userInput }];
+        const newHistory = [...conversationHistory, { type: 'user' as const, message: userQuestion }];
         setConversationHistory(newHistory);
 
-        // Simulate advisor typing
+        // Start typing indicator
         setIsTyping(true);
         setUserInput("");
 
-        // Generate advisor response after delay
-        setTimeout(() => {
-            const randomResponse = advisorResponses[Math.floor(Math.random() * advisorResponses.length)];
-            setCurrentMessage(randomResponse);
-            setConversationHistory([...newHistory, { type: 'advisor' as const, message: randomResponse }]);
+        try {
+            // Call the advisor API
+            const response = await fetch('/api/advisor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId,
+                    userQuestion,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to get advisor response');
+            }
+
+            const data = await response.json();
+            const advisorResponse = data.response;
+
+            setCurrentMessage(advisorResponse);
+            setConversationHistory([...newHistory, { type: 'advisor' as const, message: advisorResponse }]);
+        } catch (err) {
+            console.error('Error getting advisor response:', err);
+            const errorMessage = "Woof! I'm having trouble connecting right now. Please try again in a moment. 🐕";
+            setCurrentMessage(errorMessage);
+            setConversationHistory([...newHistory, { type: 'advisor' as const, message: errorMessage }]);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     return (
@@ -466,8 +489,8 @@ function FinancialAdvisorChatbot() {
                         {/* Message Content */}
                         <div className="min-h-[120px] flex items-center">
                             <div className="w-full">
-                                <p className="text-lg text-slate-800 dark:text-slate-200 leading-relaxed">
-                                    {isTyping ? (
+                                {isTyping ? (
+                                    <p className="text-lg text-slate-800 dark:text-slate-200 leading-relaxed">
                                         <span className="flex items-center">
                                             <span className="animate-pulse">Thinking...</span>
                                             <span className="ml-2 flex space-x-1">
@@ -476,10 +499,27 @@ function FinancialAdvisorChatbot() {
                                                 <span className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
                                             </span>
                                         </span>
-                                    ) : (
-                                        <span className="animate-fade-in">{currentMessage}</span>
-                                    )}
-                                </p>
+                                    </p>
+                                ) : (
+                                    <div className="text-lg text-slate-800 dark:text-slate-200 leading-relaxed prose prose-slate dark:prose-invert prose-sm max-w-none animate-fade-in">
+                                        <ReactMarkdown
+                                            components={{
+                                                p: ({children}) => <p className="mb-3 last:mb-0">{children}</p>,
+                                                ul: ({children}) => <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>,
+                                                ol: ({children}) => <ol className="list-decimal list-inside mb-3 space-y-1">{children}</ol>,
+                                                li: ({children}) => <li className="ml-2">{children}</li>,
+                                                strong: ({children}) => <strong className="font-semibold text-slate-900 dark:text-slate-100">{children}</strong>,
+                                                em: ({children}) => <em className="italic">{children}</em>,
+                                                code: ({children}) => <code className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>,
+                                                h1: ({children}) => <h1 className="text-xl font-bold mb-2">{children}</h1>,
+                                                h2: ({children}) => <h2 className="text-lg font-bold mb-2">{children}</h2>,
+                                                h3: ({children}) => <h3 className="text-base font-semibold mb-2">{children}</h3>,
+                                            }}
+                                        >
+                                            {currentMessage}
+                                        </ReactMarkdown>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
