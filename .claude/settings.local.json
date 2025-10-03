@@ -5,7 +5,8 @@
       "Bash(npx prisma migrate dev:*)",
       "Bash(pnpm build:*)",
       "WebSearch",
-      "WebFetch(domain:zod.dev)"
+      "WebFetch(domain:zod.dev)",
+      "Bash(pnpm add:*)"
     ],
     "deny": [],
     "ask": []
