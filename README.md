@@ -1,6 +1,36 @@
-# InvestEd: Financial Literacy for Everyone 🚀
+# InvestED: Financial Literacy for Everyone 🚀
 
-**Financial freedom shouldn't require a finance degree.** InvestEd is an interactive, bite-sized learning platform designed to empower everyone with the financial knowledge they need to build a better future.
+**Financial freedom shouldn't require a finance degree.** InvestED is an interactive, bite-sized learning platform designed to empower everyone with the financial knowledge they need to build a better future.
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ 
+- pnpm (recommended) or npm
+
+### Installation & Running
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm dev
+
+# Open http://localhost:3000 in your browser
+```
+
+The app will automatically reload when you make changes.
+
+### Build for Production
+
+```bash
+# Build the application
+pnpm build
+
+# Start production server
+pnpm start
+```
 
 -----
 
