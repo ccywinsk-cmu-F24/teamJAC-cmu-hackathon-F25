@@ -66,7 +66,8 @@ export default function DashboardPage() {
 
                         <section className="grid gap-4 sm:gap-6">
                             {activeTab === "Overview" && (
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="space-y-6">
+                                    <OverviewDashboard />
                                 </div>
                             )}
 
@@ -231,6 +232,172 @@ function LessonCard({
                     Read More
                 </button>
             </div>
+        </div>
+    );
+}
+
+function OverviewDashboard() {
+    const financialData = {
+        totalAssets: 45680,
+        totalDebt: 12450,
+        netWorth: 33230,
+        monthlyIncome: 5200,
+        monthlyExpenses: 3800,
+        savingsRate: 27,
+        emergencyFund: 8500,
+        retirementSavings: 18750,
+        creditScore: 742
+    };
+
+    const debtBreakdown = [
+        { name: "Credit Cards", amount: 3200, interest: 18.5, color: "bg-red-500" },
+        { name: "Student Loan", amount: 6800, interest: 4.2, color: "bg-blue-500" },
+        { name: "Car Loan", amount: 2450, interest: 6.8, color: "bg-green-500" }
+    ];
+
+    const savingsProgress = [
+        { goal: "Emergency Fund", current: 8500, target: 12000, progress: 71 },
+        { goal: "Vacation", current: 1200, target: 3000, progress: 40 },
+        { goal: "New Car", current: 3200, target: 15000, progress: 21 }
+    ];
+
+    return (
+        <div className="space-y-6">
+            {/* Financial Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <FinancialCard
+                    title="Net Worth"
+                    value={`$${financialData.netWorth.toLocaleString()}`}
+                    change="+$2,340"
+                    changeType="positive"
+                    icon="💰"
+                />
+                <FinancialCard
+                    title="Monthly Savings"
+                    value={`$${(financialData.monthlyIncome - financialData.monthlyExpenses).toLocaleString()}`}
+                    change="+$200"
+                    changeType="positive"
+                    icon="📈"
+                />
+                <FinancialCard
+                    title="Credit Score"
+                    value={financialData.creditScore.toString()}
+                    change="+12"
+                    changeType="positive"
+                    icon="🏆"
+                />
+                <FinancialCard
+                    title="Savings Rate"
+                    value={`${financialData.savingsRate}%`}
+                    change="+3%"
+                    changeType="positive"
+                    icon="🎯"
+                />
+            </div>
+
+            {/* Charts and Progress */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Debt Breakdown */}
+                <div className="rounded-xl border border-white/20 bg-white/70 dark:bg-white/10 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Debt Breakdown</h3>
+                    <div className="space-y-4">
+                        {debtBreakdown.map((debt, index) => (
+                            <div key={index} className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{debt.name}</span>
+                                    <span className="text-sm font-semibold text-gray-900 dark:text-white">${debt.amount.toLocaleString()}</span>
+                                </div>
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div 
+                                        className={`h-2 rounded-full ${debt.color}`}
+                                        style={{ width: `${(debt.amount / 6800) * 100}%` }}
+                                    ></div>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                                    <span>Interest: {debt.interest}%</span>
+                                    <span>Monthly: ${Math.round(debt.amount * debt.interest / 100 / 12)}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Savings Goals */}
+                <div className="rounded-xl border border-white/20 bg-white/70 dark:bg-white/10 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Savings Goals</h3>
+                    <div className="space-y-4">
+                        {savingsProgress.map((goal, index) => (
+                            <div key={index} className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{goal.goal}</span>
+                                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{goal.progress}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                    <div 
+                                        className="h-3 rounded-full bg-gradient-to-r from-indigo-500 to-emerald-500"
+                                        style={{ width: `${goal.progress}%` }}
+                                    ></div>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                                    <span>${goal.current.toLocaleString()}</span>
+                                    <span>${goal.target.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+
+            {/* Financial Advice */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="rounded-xl border border-white/20 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">💡 Smart Move</h3>
+                    <p className="text-gray-700 dark:text-gray-300 mb-4">
+                        Your credit score improved by 12 points this month! Consider applying for a balance transfer card to consolidate your high-interest credit card debt.
+                    </p>
+                    <div className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
+                        Potential savings: $180/month
+                    </div>
+                </div>
+
+                <div className="rounded-xl border border-white/20 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">🎯 Next Goal</h3>
+                    <p className="text-gray-700 dark:text-gray-300 mb-4">
+                        You're 71% to your emergency fund goal! At your current savings rate, you'll reach $12,000 in 3 months.
+                    </p>
+                    <div className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                        Keep up the great work! 🚀
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function FinancialCard({ title, value, change, changeType, icon }: {
+    title: string;
+    value: string;
+    change: string;
+    changeType: "positive" | "negative";
+    icon: string;
+}) {
+    return (
+        <div className="rounded-xl border border-white/20 bg-white/70 dark:bg-white/10 p-4">
+            <div className="flex items-center justify-between mb-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-500 flex items-center justify-center">
+                    <span className="text-2xl">{icon}</span>
+                </div>
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                    changeType === "positive" 
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400" 
+                        : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+                }`}>
+                    {change}
+                </span>
+            </div>
+            <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{value}</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">{title}</div>
         </div>
     );
 }
