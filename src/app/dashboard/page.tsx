@@ -1,12 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const TABS = ["Overview", "Mini-Lessons", "Decision Simulator", "Progress Tracker", "Resource Hub"] as const;
 type Tab = typeof TABS[number];
 
 export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState<Tab>("Overview");
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab === 'mini-lessons') {
+            setActiveTab('Mini-Lessons');
+        }
+    }, [searchParams]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-sky-500 to-emerald-400 dark:from-indigo-900 dark:via-sky-900 dark:to-emerald-900">
@@ -60,11 +70,31 @@ export default function DashboardPage() {
                                 </div>
                             )}
 
-                            {activeTab === "Mini-Lessons" && (
-                                <div className="grid grid-cols-1 gap-4">
-                                  
-                                </div>
-                            )}
+                             {activeTab === "Mini-Lessons" && (
+                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                     <LessonCard
+                                         title="Why $500 can change your life"
+                                         description="Learn how a small emergency fund can prevent financial disasters and provide peace of mind."
+                                         duration="2 min read"
+                                         lessonId="emergency-fund"
+                                         onReadMore={() => router.push('/dashboard/lesson/emergency-fund')}
+                                     />
+                                     <LessonCard
+                                         title="The real cost of minimum payments"
+                                         description="Discover how minimum credit card payments can trap you in debt for years."
+                                         duration="2 min read"
+                                         lessonId="credit-card-debt"
+                                         onReadMore={() => router.push('/dashboard/lesson/credit-card-debt')}
+                                     />
+                                     <LessonCard
+                                         title="50/30/20 rule explained simply"
+                                         description="Master the simple budgeting framework that works for most people."
+                                         duration="2 min read"
+                                         lessonId="budgeting-basics"
+                                         onReadMore={() => router.push('/dashboard/lesson/budgeting-basics')}
+                                     />
+                                 </div>
+                             )}
 
                             {activeTab === "Decision Simulator" && (
                                 <div className="grid grid-cols-1 gap-4">
@@ -167,6 +197,41 @@ function Toggle() {
                 }
             />
         </button>
+    );
+}
+
+function LessonCard({ 
+    title, 
+    description, 
+    duration, 
+    lessonId,
+    onReadMore
+}: {
+    title: string;
+    description: string;
+    duration: string;
+    lessonId: string;
+    onReadMore: () => void;
+}) {
+    return (
+        <div className="rounded-xl border border-white/20 bg-white/70 dark:bg-white/10 p-6 shadow-lg">
+            <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
+                <span className="text-xs bg-gradient-to-r from-indigo-600 to-emerald-500 text-white px-2 py-1 rounded-full text-center">
+                    {duration}
+                </span>
+            </div>
+            
+            <div className="space-y-4">
+                <p className="text-sm text-gray-700 dark:text-gray-300">{description}</p>
+                <button
+                    onClick={onReadMore}
+                    className="w-full bg-gradient-to-r from-indigo-600 to-emerald-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:brightness-110 transition"
+                >
+                    Read More
+                </button>
+            </div>
+        </div>
     );
 }
 
